@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ew/shader.h>
+#include <patchwork/texture.h>;
 
 struct Vertex {
 	float x, y, z;
@@ -21,16 +22,20 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-Vertex vertices[4] = {
+Vertex vertices[8] = {
 	{-1.0, -1.0, 0.0, 0.0, 0.0},
 	{1.0, -1.0, 0.0, 1.0, 0.0},
 	{1.0, 1.0, 0.0, 1.0, 1.0},
 	{-1.0, 1.0, 0.0, 0.0, 1.0}
 };
-unsigned short indices[6] = {
-	0, 1, 2,
-	2, 3, 0
+unsigned short indices[4] = {
+	0, 1, 2, 3,
 };
+
+float heartColor[3] = { 1.0f, 0.5f, 0.0f };
+float quadBrightness = 1.0f;
+int waterfallWrap = GL_REPEAT;
+int waterfallFilter = GL_LINEAR;
 
 int main() {
 	printf("Initializing...");
@@ -58,22 +63,36 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	ew::Shader waterfallShader("assets/waterfall.vert", "assets/waterfall.frag");
+	ew::Shader heartShader("assets/heart.vert", "assets/heart.frag");
 
-	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
+	unsigned int waterfallTexture = loadTexture("assets/waterfall.jpg", GL_REPEAT, GL_LINEAR);
+	unsigned int heartTexture = loadTexture("assets/heart.png", GL_REPEAT, GL_NEAREST);
 
-	glBindVertexArray(quadVAO);
+	unsigned int quadVAO = createVAO(vertices, 4, indices, 4);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glBindVertexArray(quadVAO);
+
 		//Set uniforms
-		shader.use();
+		waterfallShader.use();
+		glBindTexture(GL_TEXTURE_2D, waterfallTexture);
+		//waterfallShader.setFloat("_Brightness", 0);
+		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, NULL);
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+		heartShader.use();
+		glBindTexture(GL_TEXTURE_2D, heartTexture);
+		heartShader.setInt("_heartTexture", 1);
+		
+		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, NULL);
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 		//Render UI
 		{
 			ImGui_ImplGlfw_NewFrame();
@@ -81,6 +100,8 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
+			//ImGui::SliderFloat("Brightness", &triangleBrightness, 0.0f, 1.0f);
+			//ImGui::Selectable("REPEAT", GL_REPEAT);
 			ImGui::End();
 
 			ImGui::Render();
