@@ -58,6 +58,18 @@ int main() {
 	
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
+
+	cubeTransform[0].position.x = -0.5f;
+	cubeTransform[1].position.x = -0.5f;
+
+	cubeTransform[0].position.y = -0.5f;
+	cubeTransform[1].position.y = 0.5f;
+
+	cubeTransform[2].position.x = 0.5f;
+	cubeTransform[3].position.x = 0.5f;
+
+	cubeTransform[2].position.y = -0.5f;
+	cubeTransform[3].position.y = 0.5f;
 	
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
