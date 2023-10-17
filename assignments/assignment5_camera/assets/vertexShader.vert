@@ -4,6 +4,7 @@ layout(location = 1) in vec3 vNormal;
 
 out vec3 Normal;
 uniform mat4 _Model;
+uniform mat4 viewProj;
 
 void main(){
 	Normal = vNormal;
