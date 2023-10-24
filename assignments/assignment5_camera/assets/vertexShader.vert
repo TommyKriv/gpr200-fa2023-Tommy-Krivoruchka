@@ -8,5 +8,5 @@ uniform mat4 viewProj;
 
 void main(){
 	Normal = vNormal;
-	gl_Position = _Model * vec4(vPos,1.0);
+	gl_Position = viewProj * _Model * vec4(vPos,1.0);
 }
