@@ -15,7 +15,7 @@ set(CORE_INC_DIR
  CACHE PATH "CORE INCLUDE SOURCE PATH"
 )
 
-add_library(core STATIC ${CORE_SRC} ${CORE_INC})
+add_library(core STATIC ${CORE_SRC} ${CORE_INC} "patchwork/texture.h" "patchwork/texture.cpp" "patchwork/transformations.h" "patchwork/camera.h" )
 
 find_package(OpenGL REQUIRED)
 
