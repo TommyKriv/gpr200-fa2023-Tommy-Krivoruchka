@@ -16,15 +16,15 @@ struct Vertex {
 };
 Vertex vertices[4] = {
 	//x    y    z    u    v
-   { -0.8f , -0.8f , 0 , 0 , 0 }, //Bottom left
-   { 0.8f , -0.8f , 0 , 1 , 0 }, //Bottom right
-   { 0.8f , 0.8f , 0 , 1 , 1 },  //Top right
-   { -0.8f , 0.8f , 0 , 0 , 1 }  //Top left
+   { -0.8f , -0.8f , 0.0 , 0.0 , 0.0 }, //Bottom left
+   { 0.8f , -0.8f , 0.0 , 1.0 , 0.0 }, //Bottom right
+   { 0.8f , 0.8f , 0.0 , 1.0 , 1.0 },  //Top right
+   { -0.8f , 0.8f , 0.0 , 0.0 , 1.0 }  //Top left
 };
 
 unsigned int indices[6] = {
-	1 , 2 , 3 , //Triangle 1
-	1 , 3 , 4  //Triangle 2
+	0 , 1 , 2 , //Triangle 1
+	2 , 3 , 0  //Triangle 2
 };
 
 float triangleColor[3] = { 1.0f, 0.5f, 0.0f };

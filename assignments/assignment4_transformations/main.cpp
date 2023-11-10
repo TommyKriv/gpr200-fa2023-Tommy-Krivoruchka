@@ -10,7 +10,6 @@
 
 #include <ew/shader.h>
 #include <ew/ewMath/vec3.h>
-#include <patchwork/transformations.h>
 #include <ew/procGen.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -18,8 +17,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 //Square aspect ratio for now. We will account for this with projection later.
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 720;
-
-myLib::Transform cubeTransform[4];
 
 int main() {
 	printf("Initializing...");
@@ -82,6 +79,7 @@ int main() {
 
 		//TODO: Set model matrix uniform
 		shader.use();
+
 		shader.setMat4("_Model", cubeTransform[0].getModelMatrix());
 		cubeMesh.draw();
 
@@ -100,18 +98,19 @@ int main() {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui::NewFrame();
 
-			ImGui::Begin("Transform");
+			ImGui::Begin("Settings");
+
 			for (size_t i = 0; i < 4; i++)
 			{
 				ImGui::PushID(i);
-				if (ImGui::CollapsingHeader("Transform")) {
+				if (ImGui::CollapsingHeader("Transform")) 
+				{
 					ImGui::DragFloat3("Position", &cubeTransform[i].position.x, 0.05f);
 					ImGui::DragFloat3("Rotation", &cubeTransform[i].rotation.x, 1.0f);
 					ImGui::DragFloat3("Scale", &cubeTransform[i].scale.x, 0.05f);
 				}
 				ImGui::PopID();
 			}
-
 
 			ImGui::End();
 
