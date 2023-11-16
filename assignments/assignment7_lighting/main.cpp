@@ -47,6 +47,7 @@ int main() {
 		return 1;
 	}
 
+
 	//Initialize ImGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -58,14 +59,36 @@ int main() {
 	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 
+	struct Light {
+		ew::Vec3 position; //World space
+		ew::Vec3 color; //RGB
+	};
+
+	struct Material {
+		float ambientK; //Ambient coefficient (0-1)
+		float diffuseK; //Diffuse coefficient (0-1)
+		float specular; //Specular coefficient (0-1)
+		float shininess; //Shininess
+	};
+
+	bool blinn= true;
+
 	ew::Shader shader("assets/defaultLit.vert", "assets/defaultLit.frag");
+	ew::Shader unlit("assets/unlit.vert", "assets/unlit.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
+	
+	Material material1;
+	material1.ambientK = 0.1f;
+	material1.diffuseK = 0.7f;
+	material1.shininess = 16;
+	material1.specular = 0.5f;
 
 	//Create cube
 	ew::Mesh cubeMesh(ew::createCube(1.0f));
 	ew::Mesh planeMesh(ew::createPlane(5.0f, 5.0f, 10));
 	ew::Mesh sphereMesh(ew::createSphere(0.5f, 64));
 	ew::Mesh cylinderMesh(ew::createCylinder(0.5f, 1.0f, 32));
+	Light lights[3];
 
 	//Initialize transforms
 	ew::Transform cubeTransform;
@@ -75,6 +98,19 @@ int main() {
 	planeTransform.position = ew::Vec3(0, -1.0, 0);
 	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
 	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
+
+	lights[0].position = ew::Vec3(3, 3, -3);
+	lights[0].color = ew::Vec3(1, 1, 1);
+	ew::Transform lightTrans[3];
+	lightTrans[0].position = lights[0].position;
+
+	lights[1].position = ew::Vec3(-3, 3, -3);
+	lights[1].color = ew::Vec3(1, 1, 0);
+	lightTrans[1].position = lights[1].position;
+
+	lights[2].position = ew::Vec3(2, 3, 2);
+	lights[2].color = ew::Vec3(0, 1, 1);
+	lightTrans[2].position = lights[2].position;
 
 	resetCamera(camera,cameraController);
 
@@ -97,6 +133,7 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, brickTexture);
 		shader.setInt("_Texture", 0);
 		shader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
+		shader.setVec3("_ViewLocation", camera.position);
 
 		//Draw shapes
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
@@ -111,7 +148,31 @@ int main() {
 		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
 		cylinderMesh.draw();
 
+		shader.setVec3("_Lights[0].position", lights[0].position);
+		shader.setVec3("_Lights[0].color", lights[0].color);
+		shader.setVec3("_Lights[1].position", lights[1].position);
+		shader.setVec3("_Lights[1].color", lights[1].color);
+		shader.setVec3("_Lights[2].position", lights[2].position);
+		shader.setVec3("_Lights[2].color", lights[2].color);
+		shader.setFloat("_Material.ambientK", material1.ambientK);
+		shader.setFloat("_Material.diffuseK", material1.diffuseK);
+		shader.setFloat("_Material.shininess", material1.shininess);
+		shader.setFloat("_Material.specular", material1.specular);
+		if (blinn)
+			shader.setInt("blinn", 1);
+		else
+			shader.setInt("blinn", 0);
+
 		//TODO: Render point lights
+		unlit.use();
+		unlit.setMat4("_ViewProjection", camera.ProjectionMatrix()* camera.ViewMatrix());
+		for (int i = 0; i < 3; i++)
+		{
+			unlit.setMat4("_Model", lightTrans[i].getModelMatrix());
+			unlit.setVec3("_Color", lights[i].color);
+			sphereMesh.draw();
+		}
+
 
 		//Render UI
 		{
@@ -120,6 +181,7 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
+			ImGui::Checkbox("Blinn", &blinn);
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::DragFloat3("Position", &camera.position.x, 0.1f);
 				ImGui::DragFloat3("Target", &camera.target.x, 0.1f);
