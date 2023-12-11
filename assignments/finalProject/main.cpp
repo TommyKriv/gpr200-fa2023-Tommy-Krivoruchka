@@ -47,7 +47,7 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
-	
+
 	//Initialize ImGUI
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -73,17 +73,20 @@ int main() {
 		float shininess; //Shininess
 	};
 
-	bool blinn= true;
+	bool blinn = true;
 
 	ew::Shader shader("assets/defaultLit.vert", "assets/defaultLit.frag");
 	ew::Shader unlit("assets/unlit.vert", "assets/unlit.frag");
-	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
-	
+	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg", GL_REPEAT, GL_LINEAR);
+
 	Material material1;
 	material1.ambientK = 0.1f;
 	material1.diffuseK = 0.7f;
 	material1.shininess = 16;
 	material1.specular = 0.5f;
+
+	ew::Transform modelTransform;
+	modelTransform.position = ew::Vec3(0, -1.0, 0);
 
 	//Create cube
 	Light lights[3];
@@ -101,7 +104,7 @@ int main() {
 	lights[2].color = ew::Vec3(0, 1, 1);
 	lightTrans[2].position = lights[2].position;
 
-	resetCamera(camera,cameraController);
+	resetCamera(camera, cameraController);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -115,7 +118,7 @@ int main() {
 		cameraController.Move(window, &camera, deltaTime);
 
 		//RENDER
-		glClearColor(bgColor.x, bgColor.y,bgColor.z,1.0f);
+		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.use();
@@ -123,6 +126,11 @@ int main() {
 		shader.setInt("_Texture", 0);
 		shader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
 		shader.setVec3("_ViewLocation", camera.position);
+
+		ew::Mat4 model = ew::Mat4(1.0f);
+
+		shader.setMat4("_Model", modelTransform.getModelMatrix());
+		ourModel.Draw(shader);
 
 		shader.setVec3("_Lights[0].position", lights[0].position);
 		shader.setVec3("_Lights[0].color", lights[0].color);
@@ -141,7 +149,7 @@ int main() {
 
 		//TODO: Render point lights
 		unlit.use();
-		unlit.setMat4("_ViewProjection", camera.ProjectionMatrix()* camera.ViewMatrix());
+		unlit.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
 		for (int i = 0; i < 3; i++)
 		{
 			unlit.setMat4("_Model", lightTrans[i].getModelMatrix());
@@ -178,7 +186,7 @@ int main() {
 
 			ImGui::ColorEdit3("BG color", &bgColor.x);
 			ImGui::End();
-			
+
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
