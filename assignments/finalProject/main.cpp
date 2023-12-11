@@ -146,7 +146,6 @@ int main() {
 		{
 			unlit.setMat4("_Model", lightTrans[i].getModelMatrix());
 			unlit.setVec3("_Color", lights[i].color);
-			sphereMesh.draw();
 		}
 
 
@@ -207,26 +206,4 @@ void resetCamera(ew::Camera& camera, ew::CameraController& cameraController) {
 
 	cameraController.yaw = 0.0f;
 	cameraController.pitch = 0.0f;
-}
-
-void loadMdoel(const std::string& pFile)
-{
-
-	//Create the importer from assimp/Importer.hpp
-	Assimp::Importer importer;
-
-	//Read whatever file i want it to read.
-	const aiScene * scene = importer.ReadFile(pFile, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-	{
-		printf("Error with Assimp scene: ");
-		printf(importer.GetErrorString());
-		return;
-	}
-
-	std::string directory = pFile.substr(0, pFile.find_last_of('/'));
-
-	//Success, win, dub, yahoo
-
 }
