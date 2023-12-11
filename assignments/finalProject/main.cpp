@@ -14,8 +14,7 @@
 #include <ew/transform.h>
 #include <ew/camera.h>
 #include <ew/cameraController.h>
-#include <assimp/Importer.hpp>
-#include <ew/mesh.h>
+#include <patchwork/model.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void resetCamera(ew::Camera& camera, ew::CameraController& cameraController);
@@ -48,7 +47,6 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
-
 	
 	//Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -60,6 +58,8 @@ int main() {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
+
+	patchwork::Model ourModel("assets/torus.dae");
 
 	struct Light {
 		ew::Vec3 position; //World space
@@ -86,21 +86,7 @@ int main() {
 	material1.specular = 0.5f;
 
 	//Create cube
-	ew::Mesh cubeMesh(ew::createCube(1.0f));
-	ew::Mesh planeMesh(ew::createPlane(5.0f, 5.0f, 10));
-	ew::Mesh sphereMesh(ew::createSphere(0.5f, 64));
-	ew::Mesh cylinderMesh(ew::createCylinder(0.5f, 1.0f, 32));
 	Light lights[3];
-
-	//Initialize transforms
-	ew::Transform cubeTransform;
-	ew::Transform planeTransform;
-	ew::Transform sphereTransform;
-	ew::Transform cylinderTransform;
-	
-	planeTransform.position = ew::Vec3(0, -1.0, 0);
-	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
-	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
 
 	lights[0].position = ew::Vec3(3, 3, -3);
 	lights[0].color = ew::Vec3(1, 1, 1);
@@ -137,19 +123,6 @@ int main() {
 		shader.setInt("_Texture", 0);
 		shader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
 		shader.setVec3("_ViewLocation", camera.position);
-
-		//Draw shapes
-		shader.setMat4("_Model", cubeTransform.getModelMatrix());
-		cubeMesh.draw();
-
-		shader.setMat4("_Model", planeTransform.getModelMatrix());
-		planeMesh.draw();
-
-		shader.setMat4("_Model", sphereTransform.getModelMatrix());
-		sphereMesh.draw();
-
-		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
-		cylinderMesh.draw();
 
 		shader.setVec3("_Lights[0].position", lights[0].position);
 		shader.setVec3("_Lights[0].color", lights[0].color);
@@ -236,4 +209,24 @@ void resetCamera(ew::Camera& camera, ew::CameraController& cameraController) {
 	cameraController.pitch = 0.0f;
 }
 
+void loadMdoel(const std::string& pFile)
+{
 
+	//Create the importer from assimp/Importer.hpp
+	Assimp::Importer importer;
+
+	//Read whatever file i want it to read.
+	const aiScene * scene = importer.ReadFile(pFile, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		printf("Error with Assimp scene: ");
+		printf(importer.GetErrorString());
+		return;
+	}
+
+	std::string directory = pFile.substr(0, pFile.find_last_of('/'));
+
+	//Success, win, dub, yahoo
+
+}
