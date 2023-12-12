@@ -59,7 +59,10 @@ int main() {
 	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 
-	patchwork::Model ourModel("assets/torus.dae");
+	patchwork::Model torus("assets/torus.dae");
+	patchwork::Model chandelier("assets/GrappleYChandelier.dae");
+	patchwork::Model flower("assets/Flowa.dae");
+	patchwork::Model plate("assets/plate.dae");
 
 	struct Light {
 		ew::Vec3 position; //World space
@@ -85,8 +88,23 @@ int main() {
 	material1.shininess = 16;
 	material1.specular = 0.5f;
 
-	ew::Transform modelTransform;
-	modelTransform.position = ew::Vec3(0, -1.0, 0);
+	ew::Transform torusTransform;
+	torusTransform.position = ew::Vec3(0, -1.0, 0);
+
+	ew::Transform chandTransform;
+	chandTransform.position = ew::Vec3(3.2, 0.5, -3);
+	chandTransform.rotation = ew::Vec3(-60, 90, 0);
+	chandTransform.scale = ew::Vec3(0.2, 0.2, 0.2);
+
+	ew::Transform flowerTransform;
+	flowerTransform.position = ew::Vec3(-3.2, -0.1, -3);
+	flowerTransform.rotation = ew::Vec3(-124, 70, -78);
+	flowerTransform.scale = ew::Vec3(0.6, 0.6, 0.6);
+
+	ew::Transform plateTransform;
+	plateTransform.position = ew::Vec3(0.2, 3, -3);
+	plateTransform.rotation = ew::Vec3(-58, 47, -50);
+	plateTransform.scale = ew::Vec3(2, 2, 0.16);
 
 	//Create cube
 	Light lights[3];
@@ -129,8 +147,17 @@ int main() {
 
 		ew::Mat4 model = ew::Mat4(1.0f);
 
-		shader.setMat4("_Model", modelTransform.getModelMatrix());
-		ourModel.Draw(shader);
+		shader.setMat4("_Model", torusTransform.getModelMatrix());
+		torus.Draw(shader);
+
+		shader.setMat4("_Model", chandTransform.getModelMatrix());
+		chandelier.Draw(shader);
+
+		shader.setMat4("_Model", flowerTransform.getModelMatrix());
+		flower.Draw(shader);
+
+		shader.setMat4("_Model", plateTransform.getModelMatrix());
+		plate.Draw(shader);
 
 		shader.setVec3("_Lights[0].position", lights[0].position);
 		shader.setVec3("_Lights[0].color", lights[0].color);
