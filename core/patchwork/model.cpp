@@ -5,7 +5,7 @@
 
 namespace patchwork
 {
-    unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
+    unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false); //Prolly put this in the wrong place lmao but special method for grabbing the texture from the file.
 
     Model::Model(char* path)
     {
@@ -21,28 +21,28 @@ namespace patchwork
     void Model::loadModel(std::string path)
     {
         Assimp::Importer import;
-        const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs); //Create the scene from the data file.
 
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) //Make sure the scene loaded.
         {
             printf("ERROR::ASSIMP::"); 
             printf(import.GetErrorString());
             return;
         }
-        directory = path.substr(0, path.find_last_of('/'));
+        directory = path.substr(0, path.find_last_of('/')); //Store the file directory.
 
-        processNode(scene->mRootNode, scene);
+        processNode(scene->mRootNode, scene); //pass over.
     }
 
     void Model::processNode(aiNode* node, const aiScene* scene)
     {
-        // process all the node's meshes (if any)
+        //process all the nodes meshes (if any)
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             meshes.push_back(processMesh(mesh, scene));
         }
-        // then do the same for each of its children
+        //then do the same for each of its children 
         for (unsigned int i = 0; i < node->mNumChildren; i++)
         {
             processNode(node->mChildren[i], scene);
@@ -55,7 +55,7 @@ namespace patchwork
         std::vector<unsigned int> indices;
         std::vector<Texture> textures;
 
-        for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+        for (unsigned int i = 0; i < mesh->mNumVertices; i++) //Process each vertex.
         {
             Vertex vertex;
             ew::Vec3 vector;
@@ -69,7 +69,7 @@ namespace patchwork
             vector.z = mesh->mNormals[i].z;
             vertex.Normal = vector;
 
-            if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+            if (mesh->mTextureCoords[0]) //Check if there are texture coordinates
             {
                 ew::Vec2 vec;
                 vec.x = mesh->mTextureCoords[0][i].x;
@@ -120,7 +120,7 @@ namespace patchwork
                 }
             }
             if (!skip)
-            {   // if texture hasn't been loaded already, load it
+            {   //Check if the texture has been loaded
                 Texture texture;
                 texture.id = TextureFromFile(str.C_Str(), directory);
                 texture.type = typeName;
@@ -135,7 +135,7 @@ namespace patchwork
     unsigned int TextureFromFile(const char* path, const std::string & directory, bool gamma)
     {
         std::string filename = std::string(path);
-        filename = directory + '/' + filename;
+        filename = directory + '/' + filename; //Create the full directory from the two strings.
 
         unsigned int textureID;
         glGenTextures(1, &textureID);
@@ -146,16 +146,21 @@ namespace patchwork
         {
             GLenum format;
             if (nrComponents == 1)
+            {
                 format = GL_RED;
+            }  
             else if (nrComponents == 3)
+            {
                 format = GL_RGB;
+            }
             else if (nrComponents == 4)
+            {
                 format = GL_RGBA;
+            }
 
             glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data); //Oh my god format is unitialized!!! Oh no!
             glGenerateMipmap(GL_TEXTURE_2D);
-
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -165,7 +170,7 @@ namespace patchwork
         }
         else
         {
-            printf("Texture failed to load at path: ");
+            printf("Texture failed to load at path: "); 
             printf(path);
             stbi_image_free(data);
         }

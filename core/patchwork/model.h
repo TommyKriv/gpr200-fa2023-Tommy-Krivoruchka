@@ -2,9 +2,13 @@
 #include "mesh.h"
 #include <assimp/Importer.hpp>
 
-namespace patchwork {
+//Credit to LearnOpenGl for the guide. 
 
-	class Model {
+namespace patchwork 
+{
+
+	class Model 
+    {
     public:
         std::vector<Texture> textures_loaded;
         Model(char* path);
@@ -17,6 +21,6 @@ namespace patchwork {
         void processNode(aiNode* node, const aiScene* scene);
         Mesh processMesh(aiMesh* mesh, const aiScene* scene);
         std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
-};
+    };
 
 }

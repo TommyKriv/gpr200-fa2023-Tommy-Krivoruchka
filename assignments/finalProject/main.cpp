@@ -59,7 +59,7 @@ int main() {
 	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 
-	patchwork::Model torus("assets/torus.dae");
+	patchwork::Model torus("assets/torus.dae"); //WE GOT THE FILES WOO
 	patchwork::Model chandelier("assets/GrappleYChandelier.dae");
 	patchwork::Model flower("assets/Flowa.dae");
 	patchwork::Model plate("assets/plate.dae");
@@ -147,7 +147,7 @@ int main() {
 
 		ew::Mat4 model = ew::Mat4(1.0f);
 
-		shader.setMat4("_Model", torusTransform.getModelMatrix());
+		shader.setMat4("_Model", torusTransform.getModelMatrix()); //PUT THAT DONUT IN THE MFIN SCENE 
 		torus.Draw(shader);
 
 		shader.setMat4("_Model", chandTransform.getModelMatrix());
